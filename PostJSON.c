@@ -74,13 +74,7 @@ int PostJSON(const char *name, const char *value)
     via cJSON_InitHooks, and then test the fail flag after adding all your values.
     */
     item = cJSON_GetObjectItem(root, name);
-    if(item && item->valuestring &&
-#ifdef _WIN32
-        _stricmp(
-#else
-        strcasecmp(
-#endif
-            item->valuestring, value))
+    if(!item || !item->valuestring || strcmp(item->valuestring, value))
     {
         fprintf(stderr, "cJSON_AddStringToObject failed.\n");
         goto cleanup;
