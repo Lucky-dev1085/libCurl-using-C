@@ -5,6 +5,8 @@ Usage: PostJSON <name> <value>
 curl-library mailing list thread:
 'how do i post json to a https ?'
 http://curl.haxx.se/mail/lib-2015-01/0048.html
+
+https://gist.github.com/jay/2a6c54cc6da442489561
 */
 
 #include <stdio.h>
