@@ -127,7 +127,7 @@ int PostJSON(const char *name, const char *value)
     curl_easy_setopt(curl, CURLOPT_USERAGENT, agent);
 
     headers = curl_slist_append(headers, "Expect:");
-    headers = curl_slist_append(headers, "Content-Type: application/json; charset=utf-8");
+    headers = curl_slist_append(headers, "Content-Type: application/json");
     curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
 
     curl_easy_setopt(curl, CURLOPT_POSTFIELDS, json); 
