@@ -67,20 +67,20 @@ int PostJSON(const char *name, const char *value)
 
     if(!name)
     {
-        fprintf(stderr, "Missing name parameter.\n");
+        fprintf(stderr, "Error: Missing name parameter.\n");
         goto cleanup;
     }
 
     if(!value)
     {
-        fprintf(stderr, "Missing value parameter.\n");
+        fprintf(stderr, "Error: Missing value parameter.\n");
         goto cleanup;
     }
 
     root = cJSON_CreateObject();
     if(!root)
     {
-        fprintf(stderr, "cJSON_CreateObject failed.\n");
+        fprintf(stderr, "Error: cJSON_CreateObject failed.\n");
         goto cleanup;
     }
 
@@ -93,21 +93,21 @@ int PostJSON(const char *name, const char *value)
     item = cJSON_GetObjectItem(root, name);
     if(!item || !item->valuestring || strcmp(item->valuestring, value))
     {
-        fprintf(stderr, "cJSON_AddStringToObject failed.\n");
+        fprintf(stderr, "Error: cJSON_AddStringToObject failed.\n");
         goto cleanup;
     }
 
     json = cJSON_PrintUnformatted(root);
     if(!json)
     {
-        fprintf(stderr, "cJSON_PrintUnformatted failed.\n");
+        fprintf(stderr, "Error: cJSON_PrintUnformatted failed.\n");
         goto cleanup;
     }
 
     curl = curl_easy_init();
     if(!curl)
     {
-        fprintf(stderr, "curl_easy_init failed.\n");
+        fprintf(stderr, "Error: curl_easy_init failed.\n");
         goto cleanup;
     }
 
@@ -146,7 +146,7 @@ int PostJSON(const char *name, const char *value)
     res = curl_easy_perform(curl);
     if(res != CURLE_OK)
     {
-        fprintf(stderr, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
+        fprintf(stderr, "Error: curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
         goto cleanup;
     }
 
