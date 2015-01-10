@@ -49,7 +49,10 @@ int main(int argc, char *argv[])
     return EXIT_SUCCESS;
 }
 
-// Returns TRUE on success, FALSE on failure.
+/* Post JSON data to a server.
+name and value must be UTF-8 strings.
+Returns TRUE on success, FALSE on failure.
+*/
 int PostJSON(const char *name, const char *value)
 {
     int retcode = FALSE;
