@@ -60,6 +60,18 @@ int PostJSON(const char *name, const char *value)
     struct curl_slist *headers = NULL;
     char agent[1024] = { 0, };
 
+    if(!name)
+    {
+        fprintf(stderr, "Missing name parameter.\n");
+        goto cleanup;
+    }
+
+    if(!value)
+    {
+        fprintf(stderr, "Missing value parameter.\n");
+        goto cleanup;
+    }
+
     root = cJSON_CreateObject();
     if(!root)
     {
