@@ -74,7 +74,7 @@ int PostJSON(const char *name, const char *value)
     via cJSON_InitHooks, and then test the fail flag after adding all your values.
     */
     item = cJSON_GetObjectItem(root, name);
-    if(item && item->string &&
+    if(item && item->valuestring &&
 #ifdef _WIN32
         _stricmp(
 #else
