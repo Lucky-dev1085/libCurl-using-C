@@ -6,46 +6,32 @@ curl-library mailing list thread:
 'how do i post json to a https ?'
 http://curl.haxx.se/mail/lib-2015-01/0049.html
 
+Copyright (C) 2015 Jay Satiro <raysatiro@yahoo.com>
+http://curl.haxx.se/docs/copyright.html
+
 https://gist.github.com/jay/2a6c54cc6da442489561
 */
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
-// http://curl.haxx.se/download.html
+/* http://curl.haxx.se/download.html */
 #include <curl/curl.h>
 
-// http://sourceforge.net/projects/cjson/
+/* http://sourceforge.net/projects/cjson/ */
 #include "cJSON.h"
 
 
-int PostJSON(const char *name, const char *value);
+#undef FALSE
+#define FALSE 0
+#undef TRUE
+#define TRUE 1
 
-int main(int argc, char *argv[])
-{
-  if(argc != 3) {
-    fprintf(stderr, "Usage: PostJSON <name> <value>\n");
-    return EXIT_FAILURE;
-  }
-
-  if(curl_global_init(CURL_GLOBAL_ALL)) {
-    fprintf(stderr, "Fatal: The initialization of libcurl has failed.\n");
-    return EXIT_FAILURE;
-  }
-
-  if(atexit(curl_global_cleanup)) {
-    fprintf(stderr, "Fatal: atexit failed to register curl_global_cleanup.\n");
-    curl_global_cleanup();
-    return EXIT_FAILURE;
-  }
-
-  if(!PostJSON(argv[1], argv[2])) {
-    fprintf(stderr, "Fatal: PostJSON failed.\n");
-    return EXIT_FAILURE;
-  }
-
-  return EXIT_SUCCESS;
-}
+#ifdef _WIN32
+#undef snprintf
+#define snprintf _snprintf
+#endif
 
 /* Post JSON data to a server.
 name and value must be UTF-8 strings.
@@ -58,6 +44,7 @@ int PostJSON(const char *name, const char *value)
   char *json = NULL;
   CURL *curl = NULL;
   CURLcode res = CURLE_FAILED_INIT;
+  char errbuf[CURL_ERROR_SIZE] = { 0, };
   struct curl_slist *headers = NULL;
   char agent[1024] = { 0, };
 
@@ -114,13 +101,8 @@ int PostJSON(const char *name, const char *value)
   */
   curl_easy_setopt(curl, CURLOPT_CAINFO, "curl-ca-bundle.crt");
 
-#ifdef _WIN32
-  _snprintf(
-#else
-  snprintf(
-#endif
-    agent, sizeof agent, "libcurl/%s",
-    curl_version_info(CURLVERSION_NOW)->version);
+  snprintf(agent, sizeof agent, "libcurl/%s",
+           curl_version_info(CURLVERSION_NOW)->version);
   agent[sizeof agent - 1] = 0;
   curl_easy_setopt(curl, CURLOPT_USERAGENT, agent);
 
@@ -131,16 +113,21 @@ int PostJSON(const char *name, const char *value)
   curl_easy_setopt(curl, CURLOPT_POSTFIELDS, json);
   curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, -1L);
 
-  // This is a test server, it fakes a reply as if the json object were created
+  /* This is a test server, it fakes a reply as if the json object were
+     created */
   curl_easy_setopt(curl, CURLOPT_URL,
                    "http://jsonplaceholder.typicode.com/posts");
 
   curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
+  curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, errbuf);
 
   res = curl_easy_perform(curl);
   if(res != CURLE_OK) {
-    fprintf(stderr, "Error: curl_easy_perform() failed: %s\n",
-            curl_easy_strerror(res));
+    size_t len = strlen(errbuf);
+    fprintf(stderr, "\nlibcurl: (%d) ", res);
+    if(len)
+      fprintf(stderr, "%s%s", errbuf, ((errbuf[len - 1] != '\n') ? "\n" : ""));
+    fprintf(stderr, "%s\n\n", curl_easy_strerror(res));
     goto cleanup;
   }
 
@@ -151,4 +138,30 @@ cleanup:
   cJSON_Delete(root);
   free(json);
   return retcode;
+}
+
+int main(int argc, char *argv[])
+{
+  if(argc != 3) {
+    fprintf(stderr, "Usage: PostJSON <name> <value>\n");
+    return EXIT_FAILURE;
+  }
+
+  if(curl_global_init(CURL_GLOBAL_ALL)) {
+    fprintf(stderr, "Fatal: The initialization of libcurl has failed.\n");
+    return EXIT_FAILURE;
+  }
+
+  if(atexit(curl_global_cleanup)) {
+    fprintf(stderr, "Fatal: atexit failed to register curl_global_cleanup.\n");
+    curl_global_cleanup();
+    return EXIT_FAILURE;
+  }
+
+  if(!PostJSON(argv[1], argv[2])) {
+    fprintf(stderr, "Fatal: PostJSON failed.\n");
+    return EXIT_FAILURE;
+  }
+
+  return EXIT_SUCCESS;
 }
