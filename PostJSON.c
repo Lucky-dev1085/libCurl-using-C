@@ -19,7 +19,10 @@ https://gist.github.com/jay/2a6c54cc6da442489561
 /* http://curl.haxx.se/download.html */
 #include <curl/curl.h>
 
-/* http://sourceforge.net/projects/cjson/ */
+/* http://sourceforge.net/projects/cjson/
+cJSON is not thread safe, however that is not an issue in this example.
+http://sourceforge.net/p/cjson/feature-requests/9/
+*/
 #include "cJSON.h"
 
 
